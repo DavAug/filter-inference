@@ -13,7 +13,8 @@ def define_data_generating_model():
         directory + '/models/dixit_growth_factor_model.xml')
     mechanistic_model = chi.ReducedMechanisticModel(mechanistic_model)
     mechanistic_model.set_outputs([
-        'central.receptor_active_concentration'])
+        'central.receptor_active_concentration',
+        'central.receptor_inactive_concentration'])
     mechanistic_model.fix_parameters({
         'central.receptor_active_amount': 0,
         'central.receptor_inactive_amount': 0,
@@ -22,7 +23,9 @@ def define_data_generating_model():
     })
 
     # Define error model
-    error_model = chi.LogNormalErrorModel()
+    error_models = [
+        chi.LogNormalErrorModel(),  # active receptor conc.
+        chi.LogNormalErrorModel()]  # inactive receptor conc.
 
     # Define population model
     population_model = chi.ComposedPopulationModel([
@@ -30,8 +33,9 @@ def define_data_generating_model():
         chi.PooledModel(n_dim=3, dim_names=[
             'Deactivation rate', 'Deg. rate (act.)', 'Deg. rate (inact.)']),
         chi.GaussianModel(dim_names=['Production rate']),
-        chi.PooledModel(dim_names=['Sigma act.'])])
-    predictive_model = chi.PredictiveModel(mechanistic_model, error_model)
+        chi.PooledModel(dim_names=['Sigma act.']),
+        chi.PooledModel(dim_names=['Sigma inact.'])])
+    predictive_model = chi.PredictiveModel(mechanistic_model, error_models)
     predictive_model = chi.PopulationPredictiveModel(
         predictive_model, population_model)
 
@@ -44,7 +48,8 @@ def define_data_generating_model():
         0.25,   # degradation rate (inactive)
         1.7,    # Mean production rate
         0.05,   # Std. production rate
-        0.05]   # Sigma act.
+        0.05,   # Sigma act.
+        0.05]   # Sigma inact.
 
     return mechanistic_model, predictive_model, parameters
 
@@ -60,12 +65,13 @@ def generate_measurements(predictive_model, parameters):
     # Keep only one measurement per individual
     n_ids = 1000
     n_times = len(times)
-    n_observables = 1
+    n_observables = 2
     measurements = np.empty(shape=(n_ids, n_observables, n_times))
     for idt in range(n_times):
         start_ids = idt * n_ids
         end_ids = (idt + 1) * n_ids
         measurements[:, 0, idt] = dense_measurements[0, idt, start_ids:end_ids]
+        measurements[:, 1, idt] = dense_measurements[1, idt, start_ids:end_ids]
 
     return measurements, times
 
@@ -100,18 +106,18 @@ def run_inference(log_posterior):
     controller.set_n_runs(1)
     controller.set_parallel_evaluation(False)
     controller.set_sampler(pints.NoUTurnMCMC)
-    n_iterations = 1500
+    n_iterations = 100
     posterior_samples = controller.run(
         n_iterations=n_iterations, log_to_screen=True)
 
     # Save samples
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     posterior_samples.to_netcdf(
-        directory + '/posteriors/growth_factor_model.nc')
+        directory + '/posteriors/growth_factor_model_2_outputs.nc')
 
 
 if __name__ == '__main__':
     mm, pm, p = define_data_generating_model()
     meas, times = generate_measurements(pm, p)
-    logp = define_log_posterior(meas, times, mm, p[-1])
+    logp = define_log_posterior(meas, times, mm, p[-2:])
     run_inference(logp)
