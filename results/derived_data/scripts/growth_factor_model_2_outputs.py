@@ -57,8 +57,8 @@ def define_data_generating_model():
 def generate_measurements(predictive_model, parameters):
     # Simulate measurements
     seed = 2
-    n_ids = 3000
-    times = np.array([5, 10, 15])
+    n_ids = 5000
+    times = np.array([1, 5, 10, 15, 20])
     dense_measurements = predictive_model.sample(
         parameters, times, n_samples=n_ids, seed=seed, return_df=False)
 
