@@ -80,6 +80,7 @@ def generate_measurements(predictive_model, parameters):
     # (2 subpopulations: 1. non-apoptotic cells; 2. apoptotic cells)
     seed = 2
     n_ids = 5000
+    times = [1, 3.5, 7, 10.5, 14]
     dense_measurements = np.empty((1, len(times), n_ids))
     mask = np.array([0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12])
     p = parameters[mask]
