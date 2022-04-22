@@ -33,7 +33,14 @@ def define_data_generating_model():
         'myokit.deactivation_rate_c8': 1,
         'myokit.deactivation_rate_inf': 1,
         'myokit.deactivation_rate_nf': 1,
-        'myokit.elimination_rate': 100
+        'myokit.elimination_rate': 100,
+        'myokit.half_maximal_effect_concentration_c3_c8': 0.2,
+        'myokit.half_maximal_effect_concentration_c8_c3': 0.2,
+        'myokit.half_maximal_effect_concentration_c8_tnf': 0.6,
+        'myokit.half_maximal_inhibitory_concentration_c8_nf': 0.5,
+        'myokit.half_maximal_inhibitory_concentration_inf_tnf': 0.4,
+        'myokit.half_maximal_inhibitory_concentration_nf_c3': 0.7,
+        'myokit.half_maximal_inhibitory_concentration_nf_inf': 0.4
     })
 
     # Define error model
@@ -41,16 +48,9 @@ def define_data_generating_model():
 
     # Define population model
     population_model = chi.ComposedPopulationModel([
-        chi.PooledModel(
-            n_dim=3, dim_names=['EC50 C3 C8', 'EC50 C8 C3', 'EC50 C8 TNF']),
-        chi.GaussianModel(dim_names=['EC50 C3 NF kappa B']),
-        chi.PooledModel(dim_names=['EC50 C8 NF kappa B']),
-        chi.GaussianModel(dim_names=['EC50 NF inhibitor NF kappa B']),
-        chi.PooledModel(n_dim=4, dim_names=[
-            'EC50 NF inhibitor TNF',
-            'EC50 NF kappa B C3',
-            'EC50 NF kappa B NF inhibitor',
-            'Sigma'])
+        chi.GaussianModel(n_dim=2, dim_names=[
+            'EC50 C3 NF kappa B', 'EC50 NF inhibitor NF kappa B']),
+        chi.PooledModel(n_dim=1, dim_names=['Sigma'])
     ])
     predictive_model = chi.PredictiveModel(mechanistic_model, error_model)
     predictive_model = chi.PopulationPredictiveModel(
@@ -58,18 +58,11 @@ def define_data_generating_model():
 
     # Define model paramters
     parameters = np.array([
-        0.2,    # EC50 C3 C8
-        0.2,    # EC50 C8 C3
-        0.6,    # EC50 C8 TNF
         0.2,    # Mean EC50 C3 NF kappa B (non-apoptotic cells)
         0.005,  # Std. EC50 C3 NF kappa B
         0.05,   # Mean shift EC50 C3 NF kappa B (apoptotic cells)
-        0.5,    # EC50 C8 NF kappa B
         0.5,    # Mean EC50 NF inhibitor NF kappa B
         0.1,    # Std. EC50 NF inhibitor NF kappa B
-        0.4,    # EC50 NF inhibitor TNF
-        0.7,    # EC50 NF kappa B C3
-        0.4,    # EC50 NF kappa B NF inhibitor
         0.05])  # Sigma
 
     return mechanistic_model, predictive_model, parameters
@@ -82,11 +75,11 @@ def generate_measurements(predictive_model, parameters):
     n_ids = 5000
     times = [1, 3.5, 7, 10.5, 14]
     dense_measurements = np.empty((1, len(times), n_ids))
-    mask = np.array([0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12])
+    mask = np.array([0, 1, 3, 4, 5])
     p = parameters[mask]
     dense_measurements[:, :, :n_ids//2] = predictive_model.sample(
         p, times, n_samples=n_ids//2, seed=seed, return_df=False)
-    p[3] += parameters[5]
+    p[0] += parameters[2]
     dense_measurements[:, :, n_ids//2:] = predictive_model.sample(
         p, times, n_samples=n_ids//2, seed=seed, return_df=False)
 
@@ -112,30 +105,15 @@ def define_log_posterior(measurements, times, mechanistic_model, sigma):
     n_samples = 100
     population_filter = chi.GaussianFilter(measurements)
     population_model = chi.ComposedPopulationModel([
-        chi.PooledModel(
-            n_dim=3, dim_names=['EC50 C3 C8', 'EC50 C8 C3', 'EC50 C8 TNF']),
         chi.HeterogeneousModel(dim_names=['EC50 C3 NF kappa B']),
-        chi.PooledModel(dim_names=['EC50 C8 NF kappa B']),
         chi.GaussianModel(
-            dim_names=['EC50 NF inhibitor NF kappa B'], centered=False),
-        chi.PooledModel(n_dim=3, dim_names=[
-            'EC50 NF inhibitor TNF',
-            'EC50 NF kappa B C3',
-            'EC50 NF kappa B NF inhibitor'])
+            dim_names=['EC50 NF inhibitor NF kappa B'], centered=False)
     ])
     log_prior = pints.ComposedLogPrior(*[
-        pints.LogNormalLogPrior(-1.5, 0.5),     # EC50 C3 C8
-        pints.LogNormalLogPrior(-1.5, 0.5),     # EC50 C8 C3
-        pints.LogNormalLogPrior(-0.5, 0.3)]     # EC50 C8 TNF
-        + [
-            pints.LogNormalLogPrior(-1.5, 0.3)  # EC50 C3 NF kappa B
+        pints.GaussianLogPrior(0.22, 0.5)       # EC50 C3 NF kappa B
         ] * n_samples + [
-        pints.LogNormalLogPrior(-0.5, 0.3),     # EC50 C8 NF kappa B
-        pints.LogNormalLogPrior(-0.5, 0.3),     # Mean EC50 NF inhibitor NF kB
-        pints.LogNormalLogPrior(-2, 0.2),       # Std. EC50 NF inhibitor NF kB
-        pints.LogNormalLogPrior(-0.5, 0.3),     # EC50 NF inhibitor TNF
-        pints.LogNormalLogPrior(-0.5, 0.3),     # EC50 NF kappa B C3
-        pints.LogNormalLogPrior(-0.5, 0.3),     # EC50 NF kappa B NF inhibitor
+        pints.GaussianLogPrior(0.6, 0.1),       # Mean EC50 NF inhibitor NF kB
+        pints.LogNormalLogPrior(-2, 0.2)        # Std. EC50 NF inhibitor NF kB
     ])
     log_posterior = chi.PopulationFilterLogPosterior(
         population_filter, times, mechanistic_model, population_model,
@@ -158,7 +136,7 @@ def run_inference(log_posterior):
     # Save samples
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     posterior_samples.to_netcdf(
-        directory + '/posteriors/tnf_network_model_maximum_entropy.nc')
+        directory + '/posteriors/tnf_network_model_maximum_entropy_gf.nc')
 
 
 if __name__ == '__main__':
