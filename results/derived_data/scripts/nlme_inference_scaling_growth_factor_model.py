@@ -61,7 +61,7 @@ def generate_measurements(n_ids_per_t, predictive_model, parameters):
     seed = 2
     n_times = 6
     n_ids = n_ids_per_t * n_times
-    times = np.array([1, 5, 10, 15, 20, 25])
+    times = np.array([1, 5, 10, 15, 20])
     dense_measurements = predictive_model.sample(
         parameters, times, n_samples=n_ids, seed=seed, return_df=False)
 
@@ -95,22 +95,26 @@ def generate_measurements(n_ids_per_t, predictive_model, parameters):
     return measurements_df
 
 
-def define_log_posterior(measurements, mechanistic_model, error_model, sigma):
+def define_log_posterior(
+        measurements, mechanistic_model, error_model, params, sigma):
     population_model = chi.ComposedPopulationModel([
         chi.GaussianModel(dim_names=['Activation rate'], centered=False),
-        chi.PooledModel(n_dim=3, dim_names=[
-            'Deactivation rate', 'Deg. rate (act.)', 'Deg. rate (inact.)']),
+        # chi.PooledModel(n_dim=3, dim_names=[
+        #     'Deactivation rate', 'Deg. rate (act.)', 'Deg. rate (inact.)']),
         chi.GaussianModel(dim_names=['Production rate'], centered=False)])
     log_prior = pints.ComposedLogPrior(
         pints.GaussianLogPrior(2, 0.5),       # Mean activation rate
         pints.LogNormalLogPrior(-2, 0.5),     # Std. activation rate
-        pints.GaussianLogPrior(10, 2),        # deactivation rate
-        pints.GaussianLogPrior(0.02, 0.005),  # degradation rate (active)
-        pints.GaussianLogPrior(0.3, 0.05),    # degradation rate (inactive)
+        # pints.GaussianLogPrior(10, 2),        # deactivation rate
+        # pints.GaussianLogPrior(0.02, 0.005),  # degradation rate (active)
+        # pints.GaussianLogPrior(0.3, 0.05),    # degradation rate (inactive)
         pints.GaussianLogPrior(2, 0.5),       # Mean production rate
         pints.LogNormalLogPrior(-2, 0.5))     # Std. production rate
     problem = chi.ProblemModellingController(mechanistic_model, error_model)
     problem.fix_parameters({
+        'myokit.deactivation_rate': params[0],
+        'myokit.degradation_rate_active_receptor': params[1],
+        'myokit.degradation_rate_inactive_receptor': params[2],
         'Concentration (inact.) Sigma log': sigma[0],
         'Concentration (act.) Sigma log': sigma[1]})
     problem.set_population_model(population_model)
@@ -141,11 +145,11 @@ def run_inference(log_posterior, tofile):
 if __name__ == '__main__':
     mm, em, pm, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for n_ids in [20, 40, 60, 80, 100]:
+    for n_ids in [10, 20, 30, 40, 50]:
         meas = generate_measurements(n_ids, pm, p)
-        print(meas)
-        logp = define_log_posterior(meas, mm, em, p[-2:])
+
+        logp = define_log_posterior(meas, mm, em, p[2:5], p[-2:])
         tofile = \
-            directory + '/posteriors/growth_factor_model_' \
+            directory + '/posteriors/growth_factor_model_2_free_params_' \
             + str(int(n_ids)) + '.csv'
         run_inference(logp, tofile)
