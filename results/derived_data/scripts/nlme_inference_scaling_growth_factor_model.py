@@ -103,7 +103,7 @@ def define_log_posterior(
         'myokit.deactivation_rate': params[0],
         'myokit.degradation_rate_active_receptor': params[1],
         'myokit.degradation_rate_inactive_receptor': params[2],
-        'Concentration (act.) Sigma log': sigma})
+        'Sigma log': sigma})
     problem.set_population_model(population_model)
     problem.set_data(measurements)
     problem.set_log_prior(log_prior)
