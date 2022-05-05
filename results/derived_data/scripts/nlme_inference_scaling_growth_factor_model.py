@@ -13,10 +13,8 @@ def define_data_generating_model():
     mechanistic_model = chi.SBMLModel(
         directory + '/models/dixit_growth_factor_model.xml')
     mechanistic_model.set_outputs([
-        'central.receptor_inactive_concentration',
         'central.receptor_active_concentration'])
     mechanistic_model.set_output_names({
-        'central.receptor_inactive_concentration': 'Concentration (inact.)',
         'central.receptor_active_concentration': 'Concentration (act.)'})
     mechanistic_model = chi.ReducedMechanisticModel(mechanistic_model)
     mechanistic_model.fix_parameters({
@@ -27,8 +25,7 @@ def define_data_generating_model():
     })
 
     # Define error model
-    error_models = [
-        chi.LogNormalErrorModel(), chi.LogNormalErrorModel()]
+    error_models = chi.LogNormalErrorModel()
 
     # Define population model
     population_model = chi.ComposedPopulationModel([
@@ -50,8 +47,7 @@ def define_data_generating_model():
         0.25,   # degradation rate (inactive)
         1.7,    # Mean production rate
         0.05,   # Std. production rate
-        0.05,   # Sigma inact.
-        0.05]   # Sigma inact.
+        0.05]   # Sigma act.
 
     return mechanistic_model, error_models, predictive_model, parameters
 
@@ -66,31 +62,23 @@ def generate_measurements(n_ids_per_t, predictive_model, parameters):
         parameters, times, n_samples=n_ids, seed=seed, return_df=False)
 
     # Keep only one measurement per individual
-    n_observables = 2
+    n_observables = 1
     measurements = np.empty(shape=(n_ids_per_t, n_observables, n_times))
     for idt in range(n_times):
         start_ids = idt * n_ids_per_t
         end_ids = (idt + 1) * n_ids_per_t
         measurements[:, 0, idt] = dense_measurements[0, idt, start_ids:end_ids]
-        measurements[:, 1, idt] = dense_measurements[1, idt, start_ids:end_ids]
 
     # Format data as dataframe
     ids = np.arange(1, n_ids + 1)
     n_times = len(times)
     measurements_df = pd.DataFrame({
-        'Observable': 'Concentration (inact.)',
-        'Value': measurements[:, 0].flatten(),
+        'Observable': 'Concentration',
+        'Value': measurements.flatten(),
         'ID': ids,
         'Time': np.broadcast_to(
             times[np.newaxis, :], (n_ids_per_t, n_times)).flatten()
     })
-    measurements_df = pd.concat([measurements_df, pd.DataFrame({
-        'Observable': 'Concentration (act.)',
-        'Value': measurements[:, 1].flatten(),
-        'ID': ids,
-        'Time': np.broadcast_to(
-            times[np.newaxis, :], (n_ids_per_t, n_times)).flatten()
-    })])
 
     return measurements_df
 
@@ -115,8 +103,7 @@ def define_log_posterior(
         'myokit.deactivation_rate': params[0],
         'myokit.degradation_rate_active_receptor': params[1],
         'myokit.degradation_rate_inactive_receptor': params[2],
-        'Concentration (inact.) Sigma log': sigma[0],
-        'Concentration (act.) Sigma log': sigma[1]})
+        'Concentration (act.) Sigma log': sigma})
     problem.set_population_model(population_model)
     problem.set_data(measurements)
     problem.set_log_prior(log_prior)
@@ -148,7 +135,7 @@ if __name__ == '__main__':
     for n_ids in [10, 20, 30, 40, 50]:
         meas = generate_measurements(n_ids, pm, p)
 
-        logp = define_log_posterior(meas, mm, em, p[2:5], p[-2:])
+        logp = define_log_posterior(meas, mm, em, p[2:5], p[-1])
         tofile = \
             directory + '/posteriors/growth_factor_model_2_free_params_' \
             + str(int(n_ids)) + '.csv'
