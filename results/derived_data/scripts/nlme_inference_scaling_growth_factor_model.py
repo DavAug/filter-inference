@@ -25,7 +25,7 @@ def define_data_generating_model():
     })
 
     # Define error model
-    error_models = chi.LogNormalErrorModel()
+    error_model = chi.LogNormalErrorModel()
 
     # Define population model
     population_model = chi.ComposedPopulationModel([
@@ -33,8 +33,8 @@ def define_data_generating_model():
         chi.PooledModel(n_dim=3, dim_names=[
             'Deactivation rate', 'Deg. rate (act.)', 'Deg. rate (inact.)']),
         chi.GaussianModel(dim_names=['Production rate']),
-        chi.PooledModel(n_dim=2, dim_names=['Sigma inact.', 'Sigma act.'])])
-    predictive_model = chi.PredictiveModel(mechanistic_model, error_models)
+        chi.PooledModel(n_dim=1, dim_names=['Sigma act.'])])
+    predictive_model = chi.PredictiveModel(mechanistic_model, error_model)
     predictive_model = chi.PopulationPredictiveModel(
         predictive_model, population_model)
 
@@ -49,7 +49,7 @@ def define_data_generating_model():
         0.05,   # Std. production rate
         0.05]   # Sigma act.
 
-    return mechanistic_model, error_models, predictive_model, parameters
+    return mechanistic_model, error_model, predictive_model, parameters
 
 
 def generate_measurements(n_ids_per_t, predictive_model, parameters):
