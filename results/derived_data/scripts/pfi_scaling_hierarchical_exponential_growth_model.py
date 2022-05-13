@@ -2,7 +2,6 @@ import os
 
 import chi
 import numpy as np
-import pandas as pd
 import pints
 
 
@@ -147,21 +146,13 @@ def generate_measurements(n_ids_per_t, predictive_model, parameters):
         end_ids = (idt + 1) * n_ids_per_t
         measurements[:, 0, idt] = dense_measurements[0, idt, start_ids:end_ids]
 
-    # Format data as dataframe
-    ids = np.arange(1, n_ids + 1)
-    n_times = len(times)
-    measurements_df = pd.DataFrame({
-        'Observable': 'Count',
-        'Value': measurements.flatten(),
-        'ID': ids,
-        'Time': np.broadcast_to(
-            times[np.newaxis, :], (n_ids_per_t, n_times)).flatten()
-    })
-
-    return measurements_df
+    return measurements, times
 
 
-def define_log_posterior(measurements, mechanistic_model, error_model, sigma):
+def define_log_posterior(
+        measurements, times, mechanistic_model, error_model, sigma):
+    n_samples = 100
+    population_filter = chi.GaussianFilter(measurements)
     population_model = chi.GaussianModel(
         n_dim=2, dim_names=['Initial count', 'Growth rate'], centered=False)
     log_prior = pints.ComposedLogPrior(
@@ -169,12 +160,11 @@ def define_log_posterior(measurements, mechanistic_model, error_model, sigma):
         pints.GaussianLogPrior(5, 3),        # Mean exponential growth
         pints.LogNormalLogPrior(-0.1, 1),    # Std. initial condition
         pints.LogNormalLogPrior(-1, 1))      # Std. exponential growth
-    problem = chi.ProblemModellingController(mechanistic_model, error_model)
-    problem.fix_parameters({'Sigma': sigma})
-    problem.set_population_model(population_model)
-    problem.set_data(measurements)
-    problem.set_log_prior(log_prior)
-    log_posterior = problem.get_log_posterior()
+    log_posterior = chi.PopulationFilterLogPosterior(
+        population_filter=population_filter, times=times,
+        mechanistic_model=mechanistic_model, population_model=population_model,
+        log_prior=log_prior, sigma=sigma, error_on_log_scale=False,
+        n_samples=n_samples)
 
     return log_posterior
 
@@ -200,9 +190,9 @@ if __name__ == '__main__':
     mm, em, pm, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     for n_ids in [10, 15, 20, 25, 30, 35, 40, 45, 50, 55]:
-        meas = generate_measurements(n_ids, pm, p)
-        logp = define_log_posterior(meas, mm, em, p[-1])
+        meas, t = generate_measurements(n_ids, pm, p)
+        logp = define_log_posterior(meas, t, mm, em, p[-1])
         tofile = \
             directory + '/posteriors/hierarchical_exponential_growth_model_' \
-            + str(int(n_ids)) + '.csv'
+            + 'pfi_' + str(int(n_ids)) + '.csv'
         run_inference(logp, tofile)
