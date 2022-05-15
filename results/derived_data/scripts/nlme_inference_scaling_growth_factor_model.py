@@ -55,7 +55,7 @@ def define_data_generating_model():
 def generate_measurements(n_ids_per_t, predictive_model, parameters):
     # Simulate dense measurements
     seed = 2
-    times = np.array([1, 5, 10, 15, 20])
+    times = np.array([1, 5, 10, 15, 20, 25])
     n_times = len(times)
     n_ids = n_ids_per_t * n_times
     dense_measurements = predictive_model.sample(
@@ -93,7 +93,7 @@ def define_log_posterior(
     log_prior = pints.ComposedLogPrior(
         pints.GaussianLogPrior(2, 0.5),       # Mean activation rate
         pints.LogNormalLogPrior(-2, 0.5),     # Std. activation rate
-        # pints.GaussianLogPrior(10, 2),        # deactivation rate
+        pints.GaussianLogPrior(10, 2),        # deactivation rate
         # pints.GaussianLogPrior(0.02, 0.005),  # degradation rate (active)
         # pints.GaussianLogPrior(0.3, 0.05),    # degradation rate (inactive)
         pints.GaussianLogPrior(2, 0.5),       # Mean production rate
@@ -101,8 +101,8 @@ def define_log_posterior(
     problem = chi.ProblemModellingController(mechanistic_model, error_model)
     problem.fix_parameters({
         'myokit.deactivation_rate': params[0],
-        'myokit.degradation_rate_active_receptor': params[1],
-        'myokit.degradation_rate_inactive_receptor': params[2],
+        # 'myokit.degradation_rate_active_receptor': params[1],
+        # 'myokit.degradation_rate_inactive_receptor': params[2],
         'Sigma log': sigma})
     problem.set_population_model(population_model)
     problem.set_data(measurements)
@@ -115,7 +115,7 @@ def define_log_posterior(
 def run_inference(log_posterior, tofile):
     # Run inference
     seed = 3
-    n_chains = 1
+    n_chains = 3
     n_iterations = 1500
     initial_params = log_posterior.sample_initial_parameters(
         n_samples=n_chains, seed=seed)
@@ -132,11 +132,11 @@ def run_inference(log_posterior, tofile):
 if __name__ == '__main__':
     mm, em, pm, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for n_ids in [10, 20, 30, 40, 50]:
+    for n_ids in [10, 15, 20, 25, 30, 35, 40, 45, 50, 55]:
         meas = generate_measurements(n_ids, pm, p)
 
         logp = define_log_posterior(meas, mm, em, p[2:5], p[-1])
         tofile = \
-            directory + '/posteriors/growth_factor_model_2_free_params_' \
+            directory + '/posteriors/growth_factor_model_3_fixed_params_' \
             + str(int(n_ids)) + '.csv'
         run_inference(logp, tofile)

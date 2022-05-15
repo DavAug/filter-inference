@@ -181,7 +181,7 @@ def define_log_posterior(measurements, mechanistic_model, error_model, sigma):
 
 def run_inference(log_posterior, tofile):
     # Run inference
-    seed = 3
+    seed = 4
     n_chains = 3
     n_iterations = 1000
     initial_params = log_posterior.sample_initial_parameters(
@@ -199,7 +199,7 @@ def run_inference(log_posterior, tofile):
 if __name__ == '__main__':
     mm, em, pm, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for n_ids in [10, 15, 20, 25, 30, 35, 40, 45, 50, 55]:
+    for n_ids in [10, 15, 25, 30, 35, 40, 45, 50, 55]:
         meas = generate_measurements(n_ids, pm, p)
         logp = define_log_posterior(meas, mm, em, p[-1])
         tofile = \

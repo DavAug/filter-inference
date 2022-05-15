@@ -115,6 +115,6 @@ if __name__ == '__main__':
         meas, t = generate_measurements(n_ids, pm, p)
         logp = define_log_posterior(meas, t, mm, p[-1])
         tofile = \
-            directory + '/posteriors/growth_factor_model_4_fixed_params_' \
+            directory + '/posteriors/growth_factor_model_3_fixed_params_' \
             + str(int(n_ids)) + '.csv'
         run_inference(logp, tofile)
