@@ -1,3 +1,7 @@
 venv
 .DS_Store
-results/derived_data/posteriors
+results/derived_data/posteriors/hierarchical_expo*
+results/derived_data/posteriors/growth_factor_model_2_free*
+results/derived_data/posteriors/growth_factor_model_3_free*
+results/derived_data/posteriors/growth_factor_model_4_free*
+results/derived_data/posteriors/growth_factor_model_5_free*
