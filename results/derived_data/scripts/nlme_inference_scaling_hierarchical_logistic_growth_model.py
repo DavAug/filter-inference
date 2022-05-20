@@ -206,7 +206,9 @@ def define_log_posterior(measurements, mechanistic_model, error_model, sigma):
 
 
 def estimate_evaluation_time(log_posterior):
-    test_parameters = np.ones(log_posterior.n_parameters())
+    n = log_posterior.n_parameters()
+    test_parameters = np.ones(n)
+    test_parameters[n//2:] += 0.1
     # Evaluate once, so sensitivities are switched on
     log_posterior.evaluateS1(test_parameters)
 

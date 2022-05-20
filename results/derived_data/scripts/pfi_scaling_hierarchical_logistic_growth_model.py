@@ -1,4 +1,6 @@
 import os
+import pickle
+import timeit
 
 import chi
 import numpy as np
@@ -188,6 +190,23 @@ def define_log_posterior(measurements, times, mechanistic_model, sigma):
     return log_posterior
 
 
+def estimate_evaluation_time(log_posterior):
+    n = log_posterior.n_parameters()
+    test_parameters = np.ones(n)
+    test_parameters[n//2:] += 0.1
+    # Evaluate once, so sensitivities are switched on
+    log_posterior.evaluateS1(test_parameters)
+
+    number = 10
+    repeats = 10
+    run_time = timeit.repeat(
+        'logp.evaluateS1(p)',
+        globals=dict(logp=log_posterior, p=test_parameters),
+        number=number, repeat=repeats)
+
+    return np.min(run_time) / number
+
+
 def run_inference(log_posterior, tofile):
     # Run inference
     seed = 3
@@ -206,9 +225,23 @@ def run_inference(log_posterior, tofile):
 
 
 if __name__ == '__main__':
+    n_ids_per_t = [15, 20, 25, 30, 35, 40, 45, 50, 55]
     mm, em, pm, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for n_ids in [10, 15, 20, 25, 30, 35, 40, 45, 50, 55]:
+
+    # Estimate evaluation time of log-posterior
+    times = []
+    for n_ids in n_ids_per_t:
+        meas, t = generate_measurements(n_ids, pm, p)
+        logp = define_log_posterior(meas, t, mm, p[-1])
+        times += [estimate_evaluation_time(logp)]
+    tofile = \
+        directory + '/posteriors/hierarchical_logistic_growth_model_pfi_' \
+        'eval_time.p'
+    pickle.dump([n_ids_per_t, times], open(tofile, 'wb'))
+
+    # Estimate number of evaluations for inference
+    for n_ids in n_ids_per_t:
         meas, t = generate_measurements(n_ids, pm, p)
         logp = define_log_posterior(meas, t, mm, p[-1])
         tofile = \
