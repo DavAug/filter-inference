@@ -1,4 +1,6 @@
 import os
+import pickle
+import timeit
 
 import chi
 import numpy as np
@@ -87,22 +89,18 @@ def define_log_posterior(
         measurements, mechanistic_model, error_model, params, sigma):
     population_model = chi.ComposedPopulationModel([
         chi.GaussianModel(dim_names=['Activation rate'], centered=False),
-        # chi.PooledModel(n_dim=3, dim_names=[
-        #     'Deactivation rate', 'Deg. rate (act.)', 'Deg. rate (inact.)']),
+        chi.PooledModel(n_dim=1, dim_names=['Deactivation rate']),
         chi.GaussianModel(dim_names=['Production rate'], centered=False)])
     log_prior = pints.ComposedLogPrior(
         pints.GaussianLogPrior(2, 0.5),       # Mean activation rate
         pints.LogNormalLogPrior(-2, 0.5),     # Std. activation rate
         pints.GaussianLogPrior(10, 2),        # deactivation rate
-        # pints.GaussianLogPrior(0.02, 0.005),  # degradation rate (active)
-        # pints.GaussianLogPrior(0.3, 0.05),    # degradation rate (inactive)
         pints.GaussianLogPrior(2, 0.5),       # Mean production rate
         pints.LogNormalLogPrior(-2, 0.5))     # Std. production rate
     problem = chi.ProblemModellingController(mechanistic_model, error_model)
     problem.fix_parameters({
-        'myokit.deactivation_rate': params[0],
-        # 'myokit.degradation_rate_active_receptor': params[1],
-        # 'myokit.degradation_rate_inactive_receptor': params[2],
+        'myokit.degradation_rate_active_receptor': params[0],
+        'myokit.degradation_rate_inactive_receptor': params[1],
         'Sigma log': sigma})
     problem.set_population_model(population_model)
     problem.set_data(measurements)
@@ -112,11 +110,28 @@ def define_log_posterior(
     return log_posterior
 
 
+def estimate_evaluation_time(log_posterior):
+    n = log_posterior.n_parameters()
+    test_parameters = np.ones(n)
+    test_parameters[n//2:] += 0.1
+    # Evaluate once, so sensitivities are switched on
+    log_posterior.evaluateS1(test_parameters)
+
+    number = 10
+    repeats = 10
+    run_time = timeit.repeat(
+        'logp.evaluateS1(p)',
+        globals=dict(logp=log_posterior, p=test_parameters),
+        number=number, repeat=repeats)
+
+    return np.min(run_time) / number
+
+
 def run_inference(log_posterior, tofile):
     # Run inference
     seed = 3
     n_chains = 3
-    n_iterations = 1500
+    n_iterations = 1000
     initial_params = log_posterior.sample_initial_parameters(
         n_samples=n_chains, seed=seed)
     controller = pints.MCMCController(
@@ -125,17 +140,31 @@ def run_inference(log_posterior, tofile):
     controller.set_max_iterations(n_iterations)
     controller.set_log_to_file(tofile, csv=True)
     controller.set_chain_storage(False)
-    controller.set_parallel(False)
+    controller.set_parallel(True)
     controller.run()
 
 
 if __name__ == '__main__':
+    n_ids_per_t = [15, 20, 25, 30, 35, 40, 45, 50, 55]
     mm, em, pm, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for n_ids in [10, 15, 20, 25, 30, 35, 40, 45, 50, 55]:
-        meas = generate_measurements(n_ids, pm, p)
 
-        logp = define_log_posterior(meas, mm, em, p[2:5], p[-1])
+    # Estimate evaluation time of log-posterior
+    times = []
+    for n_ids in n_ids_per_t:
+        print('Estimating evaluation time for n_per_t=%d' % n_ids)
+        meas = generate_measurements(n_ids, pm, p)
+        logp = define_log_posterior(meas, mm, em, p[3:5], p[-1])
+        times += [estimate_evaluation_time(logp)]
+    tofile = \
+        directory + '/posteriors/growth_factor_model_3_fixed_params_' \
+        'eval_time.p'
+    pickle.dump([n_ids_per_t, times], open(tofile, 'wb'))
+
+    # Estimate number of evaluations for inference
+    for n_ids in n_ids_per_t:
+        meas = generate_measurements(n_ids, pm, p)
+        logp = define_log_posterior(meas, mm, em, p[3:5], p[-1])
         tofile = \
             directory + '/posteriors/growth_factor_model_3_fixed_params_' \
             + str(int(n_ids)) + '.csv'
