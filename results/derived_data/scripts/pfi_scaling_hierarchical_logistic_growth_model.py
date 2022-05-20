@@ -225,7 +225,7 @@ def run_inference(log_posterior, tofile):
 
 
 if __name__ == '__main__':
-    n_ids_per_t = [15, 20, 25, 30, 35, 40, 45, 50, 55]
+    n_ids_per_t = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
     mm, em, pm, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
