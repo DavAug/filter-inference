@@ -1,4 +1,6 @@
 import os
+import pickle
+import timeit
 
 import chi
 import numpy as np
@@ -144,7 +146,9 @@ def define_data_generating_model():
         5,     # Std. capacity
         0.08]  # Sigma
 
-    return mechanistic_model, error_model, predictive_model, parameters
+    return (
+        mechanistic_model, error_model, predictive_model, population_model,
+        parameters)
 
 
 def generate_measurements(n_ids_per_t, predictive_model, parameters):
@@ -201,11 +205,26 @@ def define_log_posterior(measurements, mechanistic_model, error_model, sigma):
     return log_posterior
 
 
+def estimate_evaluation_time(log_posterior):
+    test_parameters = np.ones(log_posterior.n_parameters())
+    # Evaluate once, so sensitivities are switched on
+    log_posterior.evaluateS1(test_parameters)
+
+    number = 10
+    repeats = 10
+    run_time = timeit.repeat(
+        'logp.evaluateS1(p)',
+        globals=dict(logp=log_posterior, p=test_parameters),
+        number=number, repeat=repeats)
+
+    return np.min(run_time) / number
+
+
 def run_inference(log_posterior, tofile):
     # Run inference
     seed = 3
-    n_chains = 1
-    n_iterations = 1500
+    n_chains = 3
+    n_iterations = 1000
     initial_params = log_posterior.sample_initial_parameters(
         n_samples=n_chains, seed=seed)
     controller = pints.MCMCController(
@@ -214,14 +233,28 @@ def run_inference(log_posterior, tofile):
     controller.set_max_iterations(n_iterations)
     controller.set_log_to_file(tofile, csv=True)
     controller.set_chain_storage(False)
-    controller.set_parallel(False)
+    controller.set_parallel(True)
     controller.run()
 
 
 if __name__ == '__main__':
-    mm, em, pm, p = define_data_generating_model()
+    n_ids_per_t = [15, 20, 25, 30, 35, 40, 45, 50, 55]
+    mm, em, pm, pop_m, p = define_data_generating_model()
     directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for n_ids in [50, 100, 150, 200, 250]:
+
+    # Estimate evaluation time of log-posterior
+    times = []
+    for n_ids in n_ids_per_t:
+        meas = generate_measurements(n_ids, pm, p)
+        logp = define_log_posterior(meas, mm, em, p[-1])
+        times += [estimate_evaluation_time(logp)]
+    tofile = \
+        directory + '/posteriors/hierarchical_logistic_growth_model_' \
+        'eval_time.p'
+    pickle.dump([n_ids_per_t, times], open(tofile, 'wb'))
+
+    # Estimate number of evaluations for inference
+    for n_ids in n_ids_per_t:
         meas = generate_measurements(n_ids, pm, p)
         logp = define_log_posterior(meas, mm, em, p[-1])
         tofile = \
