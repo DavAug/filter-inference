@@ -224,7 +224,7 @@ if __name__ == '__main__':
         logp = define_log_posterior(meas, mm, em)
         times += [estimate_evaluation_time(logp)]
     tofile = \
-        directory + '/posteriors/hierarchical_logistic_growth_model_' \
+        directory + '/posteriors/hierarchical_exponential_growth_model_' \
         'eval_time.p'
     pickle.dump([n_ids_per_t, times], open(tofile, 'wb'))
 
