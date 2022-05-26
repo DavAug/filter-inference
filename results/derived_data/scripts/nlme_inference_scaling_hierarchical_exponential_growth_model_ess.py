@@ -208,6 +208,7 @@ def run_inference(log_posterior, tofile):
     controller = chi.SamplingController(log_posterior, seed)
     controller.set_parallel_evaluation(False)
     controller.set_n_runs(n_chains)
+    controller.set_sampler(pints.NoUTurnMCMC)
     samples = controller.run(n_iterations, log_to_screen=True)
     samples.to_netcdf(tofile)
 
