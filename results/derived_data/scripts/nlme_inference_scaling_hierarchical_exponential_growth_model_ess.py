@@ -219,8 +219,8 @@ if __name__ == '__main__':
 
     # Estimate evaluation time of log-posterior
     times = []
-    for n_ids in n_ids_per_t:
-        meas = generate_measurements(n_ids, pm, p)
+    for seed, n_ids in enumerate(n_ids_per_t):
+        meas = generate_measurements(n_ids, pm, p, seed)
         logp = define_log_posterior(meas, mm, em)
         times += [estimate_evaluation_time(logp)]
     tofile = \
