@@ -16,7 +16,8 @@ class GrowthFactorModel(chi.MechanisticModel):
         self._ligand_concs = ligand_concs
 
         # Define models
-        directory = os.path.dirname(os.getcwd())
+        directory = os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         model1 = chi.SBMLModel(
             directory + '/models/dixit_growth_factor_model.xml')
         model1 = chi.ReducedMechanisticModel(model1)
