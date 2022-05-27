@@ -153,11 +153,9 @@ def generate_measurements(n_ids_per_t, predictive_model, parameters, seed):
 def define_log_posterior(measurements, times, mechanistic_model):
     n_samples = 100
     population_filter = chi.GaussianFilter(measurements)
-    population_model = chi.ComposedPopulationModel([
-        chi.GaussianModel(
-            n_dim=2, dim_names=['Initial count', 'Growth rate'],
-            centered=False),
-        chi.PooledModel(dim_names=['Sigma'])])
+    population_model = chi.GaussianModel(
+        n_dim=2, dim_names=['Initial count', 'Growth rate'],
+        centered=False)
     log_prior = pints.ComposedLogPrior(
         pints.GaussianLogPrior(9, 3),        # Mean initial condition
         pints.GaussianLogPrior(5, 3),        # Mean exponential growth
