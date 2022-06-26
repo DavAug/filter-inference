@@ -55,7 +55,7 @@ def define_log_posterior(n_ids_per_t, f):
         pints.LogNormalLogPrior(2, 1),       # Std. initial condition
         pints.GaussianLogPrior(5, 3),        # Mean exponential growth (slow)
         pints.LogNormalLogPrior(0.5, 1),     # Std. exponential growth
-        pints.GaussianLogPrior(3, 1),        # Mean shift growth (fast)
+        pints.GaussianLogPrior(5, 3),        # Mean shift growth (fast)
         pints.GaussianLogPrior(0.8, 0.1))    # Sigma
     log_posterior = chi.PopulationFilterLogPosterior(
         population_filter, times, mechanistic_model, population_model,
@@ -104,10 +104,6 @@ if __name__ == '__main__':
         'lognormal_kde']
     for idn, n in enumerate([20, 500]):
         for idf, f in enumerate(filters):
-            if f in [
-                    'gaussian', 'lognormal',
-                    'gaussian_kde', 'lognormal_kde']:
-                continue
             lp, temp = define_log_posterior(n, f)
             if lp is None:
                 continue
