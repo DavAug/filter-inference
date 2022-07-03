@@ -6,7 +6,7 @@ plot_cancer_growth_results: results/1_cancer_growth/results.ipynb
 	jupyter nbconvert --to notebook --inplace --execute $<
 
 # Reproduce results from scratch (may take several hours)
-reproduce_results: reproduce_cancer_growth_results
+reproduce_results: reproduce_cancer_growth_results reproduce_egf_pathway_results
 
 # 1. Cancer growth study
 reproduce_cancer_growth_results: generate_cancer_data run_nlme_inference_cancer_data run_filter_inference_cancer_data run_information_loss_experiment_1 generate_bimodal_cancer_data run_nlme_inference_bimodal_cancer_data run_filter_inference_bimodal_cancer_data
@@ -24,6 +24,13 @@ run_nlme_inference_bimodal_cancer_data:
 	python results/1_cancer_growth/6_run_nlme_inference_bimodal_cancer_growth.py
 run_filter_inference_bimodal_cancer_data:
 	python results/1_cancer_growth/7_run_filter_inference_bimodal_cancer_growth.py
+
+# 2. EGF pathway study
+reproduce_egf_pathway_results: generate_egf_pathway_data run_filter_inference_egf_pathway_data
+generate_egf_pathway_data:
+	python results/2_egf_pathway/1_generate_egf_pathway_data.py
+run_filter_inference_egf_pathway_data:
+	python results/2_egf_pathway/2_run_filter_inference_egf_pathway.py
 
 
 # # Run analysis of in vitro study
