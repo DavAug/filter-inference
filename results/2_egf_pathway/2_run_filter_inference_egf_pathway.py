@@ -37,7 +37,7 @@ def define_log_posterior():
             measurements[:, ido, idt] = temp[mask].Value.values
 
     # Define log-posterior
-    population_filter = chi.GaussianMixtureFilter(measurements, n_kernels=2)
+    population_filter = chi.GaussianFilter(measurements)
     log_prior = pints.ComposedLogPrior(
         pints.GaussianLogPrior(2, 0.5),       # Mean activation rate
         pints.LogNormalLogPrior(-2, 0.5),     # Std. activation rate
