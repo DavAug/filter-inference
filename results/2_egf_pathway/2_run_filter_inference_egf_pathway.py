@@ -48,7 +48,7 @@ def define_log_posterior():
         pints.LogNormalLogPrior(-2, 0.5))     # Std. production rate
     log_posterior = chi.PopulationFilterLogPosterior(
         population_filter, times, mechanistic_model, population_model,
-        log_prior, sigma=[0.5, 0.5, 0.5, 0.5], error_on_log_scale=True)
+        log_prior, sigma=[0.05, 0.05, 0.05, 0.05], error_on_log_scale=True)
 
     return log_posterior
 
@@ -75,5 +75,5 @@ if __name__ == '__main__':
     lp = define_log_posterior()
     filename = \
         directory + \
-        '/posteriors/%d_filter_inference_egf_pathway.nc'
+        '/posteriors/filter_inference_egf_pathway.nc'
     run_inference(lp, filename)
