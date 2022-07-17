@@ -80,12 +80,12 @@ def define_log_posterior():
         pints.GaussianLogPrior(0.3, 0.07),  # EC50 C3 C8
         pints.GaussianLogPrior(0.3, 0.07),  # EC50 C8 C3
         pints.GaussianLogPrior(0.5, 0.1),   # EC50 C8 TNF
-        pints.GaussianLogPrior(0.3, 0.07),  # Mean EC50 C3 NF kappa B no ap.
-        pints.LogNormalLogPrior(-4, 1),     # Std. EC50 C3 NF kappa B
+        pints.GaussianLogPrior(0.4, 0.07),  # Mean EC50 C3 NF kappa B no ap.
+        pints.GaussianLogPrior(0.01, 2E-3),  # Std. EC50 C3 NF kappa B
         pints.GaussianLogPrior(0.1, 0.02),  # Mean shift EC50 C3 NF kappa B ap.
         pints.GaussianLogPrior(0.5, 0.1),   # EC50 C8 NF kappa B
-        pints.GaussianLogPrior(0.5, 0.1),   # Mean EC50 NF inhibitor NF kappa B
-        pints.LogNormalLogPrior(-2, 1),     # Std. EC50 NF inhibitor NF kappa B
+        pints.GaussianLogPrior(0.6, 0.1),   # Mean EC50 NF inhibitor NF kappa B
+        pints.GaussianLogPrior(0.1, 2E-2),  # Std. EC50 NF inhibitor NF kappa B
         pints.GaussianLogPrior(0.5, 0.1),   # EC50 NF inhibitor TNF
         pints.GaussianLogPrior(0.6, 0.1),   # EC50 NF kappa B C3
         pints.GaussianLogPrior(0.5, 0.1)    # EC50 NF kappa B NF inhibitor
