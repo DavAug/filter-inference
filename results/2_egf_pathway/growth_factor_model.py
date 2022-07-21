@@ -9,7 +9,7 @@ class GrowthFactorModel(chi.MechanisticModel):
     A model that simulates inactive and active receptor concentrations in
     the presence of 2 distinct ligand concentrations.
     """
-    def __init__(self, ligand_concs=[2, 10]):
+    def __init__(self, ligand_concs=[2, 10], deactivation_rate=None):
         super(GrowthFactorModel, self).__init__()
         ligand_concs = np.array(ligand_concs)
         if np.any(ligand_concs) < 0:
@@ -23,6 +23,7 @@ class GrowthFactorModel(chi.MechanisticModel):
                 'be an array-like object of shape (2,).')
         conc1, conc2 = ligand_concs
         self._ligand_concs = ligand_concs
+        self._deactivation_rate = deactivation_rate
 
         # Define models
         directory = os.path.dirname(
@@ -34,7 +35,8 @@ class GrowthFactorModel(chi.MechanisticModel):
             'central.receptor_active_amount': 0,
             'central.receptor_inactive_amount': 0,
             'central.ligand_amount': conc1,
-            'central.size': 1
+            'central.size': 1,
+            'myokit.deactivation_rate': deactivation_rate
         })
         model2 = chi.SBMLModel(
             directory + '/models/dixit_growth_factor_model.xml')
@@ -43,14 +45,15 @@ class GrowthFactorModel(chi.MechanisticModel):
             'central.receptor_active_amount': 0,
             'central.receptor_inactive_amount': 0,
             'central.ligand_amount': conc2,
-            'central.size': 1
+            'central.size': 1,
+            'myokit.deactivation_rate': deactivation_rate
         })
 
         self._model1 = model1
         self._model2 = model2
 
     def copy(self):
-        return GrowthFactorModel(self._ligand_concs)
+        return GrowthFactorModel(self._ligand_concs, self._deactivation_rate)
 
     def enable_sensitivities(self, enabled):
         self._model1.enable_sensitivities(enabled)

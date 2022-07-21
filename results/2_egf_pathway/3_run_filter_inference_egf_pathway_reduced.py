@@ -15,15 +15,11 @@ def define_log_posterior():
         directory + '/data/1_egf_pathway_data.csv')
 
     # Define model
-    mechanistic_model = GrowthFactorModel()
-    mechanistic_model = chi.ReducedMechanisticModel(mechanistic_model)
-    mechanistic_model.fix_parameters({
-        'myokit.deactivation_rate': 8
-    })
+    mechanistic_model = GrowthFactorModel(deactivation_rate=8)
     population_model = chi.ComposedPopulationModel([
         chi.GaussianModel(dim_names=['Activation rate'], centered=False),
-        chi.PooledModel(n_dim=3, dim_names=[
-            'Deactivation rate', 'Deg. rate (act.)', 'Deg. rate (inact.)']),
+        chi.PooledModel(n_dim=2, dim_names=[
+            'Deg. rate (act.)', 'Deg. rate (inact.)']),
         chi.GaussianModel(dim_names=['Production rate'], centered=False)])
 
     # Reshape data to numpy array of shape (n_ids_per_t, n_output, n_times)
