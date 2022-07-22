@@ -22,16 +22,6 @@ def define_data_generating_model():
         'myokit.nf_kappaB': 0.26,
         'myokit.nf_kappaB_inhibitor': 0.625,
         'central.size': 1,
-        'myokit.activation_rate_c3': 1,
-        'myokit.activation_rate_c8_c3': 0.5,
-        'myokit.activation_rate_c8_tnf': 0.5,
-        'myokit.activation_rate_inf_nf': 0.5,
-        'myokit.activation_rate_inf_tnf': 0.5,
-        'myokit.activation_rate_nf': 1,
-        'myokit.deactivation_rate_c3': 1,
-        'myokit.deactivation_rate_c8': 1,
-        'myokit.deactivation_rate_inf': 1,
-        'myokit.deactivation_rate_nf': 1,
         'myokit.elimination_rate': 100
     })
 
