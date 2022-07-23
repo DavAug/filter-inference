@@ -2,6 +2,8 @@
 <sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" level="3" version="2">
   <model id="chaves_tnf_network_model" timeUnits="second">
 
+  # REMOVE UNNECESSARY PARAMETERS!!
+
     <listOfUnitDefinitions>
       <unitDefinition id="per_second">
         <listOfUnits>
@@ -58,49 +60,24 @@
       <parameter id="nf_kappaB_inhibitor" value="1" constant="false" units="mg_per_L"/>
 
       <!-- Caspase 8 activation rate, deactivation rate and modifier EC50s (assumes infinite supply of procaspase 8) -->
-      <parameter id="activation_rate_c8_tnf" value="1" constant="true" units="mg_per_L_per_second"/>
-      <parameter id="activation_rate_c8_c3" value="1" constant="true" units="mg_per_L_per_second"/>
-      <parameter id="deactivation_rate_c8" value="1" constant="true" units="per_second"/>
       <parameter id="half_maximal_inhibitory_concentration_c8_nf" value="1" constant="true" units="mg_per_L"/>
       <parameter id="half_maximal_effect_concentration_c8_tnf" value="1" constant="true" units="mg_per_L"/>
       <parameter id="half_maximal_effect_concentration_c8_c3" value="1" constant="true" units="mg_per_L"/>
 
       <!-- Caspase 3 activation rate, deactivation rate and modifier EC50s (assumes infinite supply of procaspase 3) -->
-      <parameter id="activation_rate_c3" value="1" constant="true" units="mg_per_L_per_second"/>
-      <parameter id="deactivation_rate_c3" value="1" constant="true" units="per_second"/>
       <parameter id="half_maximal_inhibitory_concentration_c3_nf" value="1" constant="true" units="mg_per_L"/>
       <parameter id="half_maximal_effect_concentration_c3_c8" value="1" constant="true" units="mg_per_L"/>
 
       <!-- Nuclear transcription factor kappa B activation rate, deactivation rate and modifier EC50s -->
-      <parameter id="activation_rate_nf" value="1" constant="true" units="mg_per_L_per_second"/>
-      <parameter id="deactivation_rate_nf" value="1" constant="true" units="per_second"/>
       <parameter id="half_maximal_inhibitory_concentration_nf_inf" value="1" constant="true" units="mg_per_L"/>
       <parameter id="half_maximal_inhibitory_concentration_nf_c3" value="1" constant="true" units="mg_per_L"/>
 
       <!-- Nuclear transcription factor inhibitor activation rate, deactivation rate and modifier EC50s -->
-      <parameter id="activation_rate_inf_tnf" value="1" constant="true" units="mg_per_L_per_second"/>
-      <parameter id="activation_rate_inf_nf" value="1" constant="true" units="mg_per_L_per_second"/>
-      <parameter id="deactivation_rate_inf" value="1" constant="true" units="per_second"/>
       <parameter id="half_maximal_inhibitory_concentration_inf_tnf" value="1" constant="true" units="mg_per_L"/>
       <parameter id="half_maximal_inhibitory_concentration_inf_nf" value="1" constant="true" units="mg_per_L"/>
 
       <!-- Tumour necrosis factor elimination rate -->
       <parameter id="elimination_rate" value="1" constant="true" units="per_second"/>
-
-      <!-- Intermediate convenience parameters -->
-      <parameter id="deactivation_c3" value="1" constant="false" units="mg_per_L_per_second"/>
-      <parameter id="activation_c3" value="1" constant="false" units="mg_per_L_per_second"/>
-
-      <parameter id="deactivation_c8" value="1" constant="false" units="mg_per_L_per_second"/>
-      <parameter id="activation_c8_tnf" value="1" constant="false" units="mg_per_L_per_second"/>
-      <parameter id="activation_c8_c3" value="1" constant="false" units="mg_per_L_per_second"/>
-
-      <parameter id="deactivation_nf" value="1" constant="false" units="mg_per_L_per_second"/>
-      <parameter id="activation_nf" value="1" constant="false" units="mg_per_L_per_second"/>
-
-      <parameter id="deactivation_inf" value="1" constant="false" units="mg_per_L_per_second"/>
-      <parameter id="activation_inf_tnf" value="1" constant="false" units="mg_per_L_per_second"/>
-      <parameter id="activation_inf_nf" value="1" constant="false" units="mg_per_L_per_second"/>
     </listOfParameters>
 
     <listOfRules>
@@ -109,72 +86,60 @@
         <math xmlns="http://www.w3.org/1998/Math/MathML">
           <apply>
             <minus/>
-            <ci> activation_c3 </ci>
-            <ci> deactivation_c3 </ci>
-          </apply>
-        </math>
-      </rateRule>
-
-      <assignmentRule variable="activation_c3">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> activation_rate_c3 </ci>
             <apply>
-              <divide/>
+              <times/>
+              <cn> 1 </cn>
               <apply>
-                <power/>
-                <ci> half_maximal_inhibitory_concentration_c3_nf </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
-                <apply>
-                  <power/>
-                  <ci> nf_kappaB </ci>
-                  <cn> 2 </cn>
-                </apply>
+                <divide/>
                 <apply>
                   <power/>
                   <ci> half_maximal_inhibitory_concentration_c3_nf </ci>
                   <cn> 2 </cn>
                 </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> nf_kappaB </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> half_maximal_inhibitory_concentration_c3_nf </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
               </apply>
-            </apply>
-            <apply>
-              <divide/>
               <apply>
-                <power/>
-                <ci> caspase_8 </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
+                <divide/>
                 <apply>
                   <power/>
                   <ci> caspase_8 </ci>
                   <cn> 2 </cn>
                 </apply>
                 <apply>
-                  <power/>
-                  <ci> half_maximal_effect_concentration_c3_c8 </ci>
-                  <cn> 2 </cn>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> caspase_8 </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> half_maximal_effect_concentration_c3_c8 </ci>
+                    <cn> 2 </cn>
+                  </apply>
                 </apply>
               </apply>
             </apply>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> caspase_3 </ci>
+            </apply>
           </apply>
         </math>
-      </assignmentRule>
-
-      <assignmentRule variable="deactivation_c3">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> deactivation_rate_c3 </ci>
-            <ci> caspase_3 </ci>
-          </apply>
-        </math>
-      </assignmentRule>
+      </rateRule>
 
       <!-- Caspase 8 -->
       <rateRule variable="caspase_8">
@@ -183,176 +148,146 @@
             <minus/>
             <apply>
               <plus/>
-              <ci> activation_c8_tnf </ci>
-              <ci> activation_c8_c3 </ci>
+              <apply>
+                <times/>
+                <cn> 0.5 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> half_maximal_inhibitory_concentration_c8_nf </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> nf_kappaB </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> half_maximal_inhibitory_concentration_c8_nf </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tumour_necrosis_factor </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> tumour_necrosis_factor </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> half_maximal_effect_concentration_c8_tnf </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <cn> 0.5 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> caspase_3 </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> caspase_3 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> half_maximal_effect_concentration_c8_c3 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
             </apply>
-            <ci> deactivation_c8 </ci>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> caspase_8 </ci>
+            </apply>
           </apply>
         </math>
       </rateRule>
-
-      <assignmentRule variable="activation_c8_tnf">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> activation_rate_c8_tnf </ci>
-            <apply>
-              <divide/>
-              <apply>
-                <power/>
-                <ci> half_maximal_inhibitory_concentration_c8_nf </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
-                <apply>
-                  <power/>
-                  <ci> nf_kappaB </ci>
-                  <cn> 2 </cn>
-                </apply>
-                <apply>
-                  <power/>
-                  <ci> half_maximal_inhibitory_concentration_c8_nf </ci>
-                  <cn> 2 </cn>
-                </apply>
-              </apply>
-            </apply>
-            <apply>
-              <divide/>
-              <apply>
-                <power/>
-                <ci> tumour_necrosis_factor </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
-                <apply>
-                  <power/>
-                  <ci> tumour_necrosis_factor </ci>
-                  <cn> 2 </cn>
-                </apply>
-                <apply>
-                  <power/>
-                  <ci> half_maximal_effect_concentration_c8_tnf </ci>
-                  <cn> 2 </cn>
-                </apply>
-              </apply>
-            </apply>
-          </apply>
-        </math>
-      </assignmentRule>
-
-      <assignmentRule variable="activation_c8_c3">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> activation_rate_c8_c3 </ci>
-            <apply>
-              <divide/>
-              <apply>
-                <power/>
-                <ci> caspase_3 </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
-                <apply>
-                  <power/>
-                  <ci> caspase_3 </ci>
-                  <cn> 2 </cn>
-                </apply>
-                <apply>
-                  <power/>
-                  <ci> half_maximal_effect_concentration_c8_c3 </ci>
-                  <cn> 2 </cn>
-                </apply>
-              </apply>
-            </apply>
-          </apply>
-        </math>
-      </assignmentRule>
-
-      <assignmentRule variable="deactivation_c8">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> deactivation_rate_c8 </ci>
-            <ci> caspase_8 </ci>
-          </apply>
-        </math>
-      </assignmentRule>
 
       <!-- Nuclear transcription factor kappa B -->
       <rateRule variable="nf_kappaB">
         <math xmlns="http://www.w3.org/1998/Math/MathML">
           <apply>
             <minus/>
-            <ci> activation_nf </ci>
-            <ci> deactivation_nf </ci>
-          </apply>
-        </math>
-      </rateRule>
-
-      <assignmentRule variable="activation_nf">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> activation_rate_nf </ci>
             <apply>
-              <divide/>
+              <times/>
+              <cn> 1 </cn>
               <apply>
-                <power/>
-                <ci> half_maximal_inhibitory_concentration_nf_c3 </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
-                <apply>
-                  <power/>
-                  <ci> caspase_3 </ci>
-                  <cn> 2 </cn>
-                </apply>
+                <divide/>
                 <apply>
                   <power/>
                   <ci> half_maximal_inhibitory_concentration_nf_c3 </ci>
                   <cn> 2 </cn>
                 </apply>
-              </apply>
-            </apply>
-            <apply>
-              <divide/>
-              <apply>
-                <power/>
-                <ci> half_maximal_inhibitory_concentration_nf_inf </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
                 <apply>
-                  <power/>
-                  <ci> nf_kappaB_inhibitor </ci>
-                  <cn> 2 </cn>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> caspase_3 </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> half_maximal_inhibitory_concentration_nf_c3 </ci>
+                    <cn> 2 </cn>
+                  </apply>
                 </apply>
+              </apply>
+              <apply>
+                <divide/>
                 <apply>
                   <power/>
                   <ci> half_maximal_inhibitory_concentration_nf_inf </ci>
                   <cn> 2 </cn>
                 </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> nf_kappaB_inhibitor </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> half_maximal_inhibitory_concentration_nf_inf </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
               </apply>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> nf_kappaB </ci>
             </apply>
           </apply>
         </math>
-      </assignmentRule>
-
-      <assignmentRule variable="deactivation_nf">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> deactivation_rate_nf </ci>
-            <ci> nf_kappaB </ci>
-          </apply>
-        </math>
-      </assignmentRule>
+      </rateRule>
 
       <!-- Nuclear transcription factor inhibitor -->
       <rateRule variable="nf_kappaB_inhibitor">
@@ -361,83 +296,65 @@
             <minus/>
             <apply>
               <plus/>
-              <ci> activation_inf_tnf </ci>
-              <ci> activation_inf_nf </ci>
+              <apply>
+                <times/>
+                <cn> 0.5 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> half_maximal_inhibitory_concentration_inf_tnf </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> tumour_necrosis_factor </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> half_maximal_inhibitory_concentration_inf_tnf </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <cn> 0.5 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> half_maximal_inhibitory_concentration_inf_nf </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> nf_kappaB </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> half_maximal_inhibitory_concentration_inf_nf </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
             </apply>
-            <ci> deactivation_inf </ci>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> nf_kappaB_inhibitor </ci>
+            </apply>
           </apply>
         </math>
       </rateRule>
-
-      <assignmentRule variable="activation_inf_tnf">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> activation_rate_inf_tnf </ci>
-            <apply>
-              <divide/>
-              <apply>
-                <power/>
-                <ci> half_maximal_inhibitory_concentration_inf_tnf </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
-                <apply>
-                  <power/>
-                  <ci> tumour_necrosis_factor </ci>
-                  <cn> 2 </cn>
-                </apply>
-                <apply>
-                  <power/>
-                  <ci> half_maximal_inhibitory_concentration_inf_tnf </ci>
-                  <cn> 2 </cn>
-                </apply>
-              </apply>
-            </apply>
-          </apply>
-        </math>
-      </assignmentRule>
-
-      <assignmentRule variable="activation_inf_nf">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> activation_rate_inf_nf </ci>
-            <apply>
-              <divide/>
-              <apply>
-                <power/>
-                <ci> half_maximal_inhibitory_concentration_inf_nf </ci>
-                <cn> 2 </cn>
-              </apply>
-              <apply>
-                <plus/>
-                <apply>
-                  <power/>
-                  <ci> nf_kappaB </ci>
-                  <cn> 2 </cn>
-                </apply>
-                <apply>
-                  <power/>
-                  <ci> half_maximal_inhibitory_concentration_inf_nf </ci>
-                  <cn> 2 </cn>
-                </apply>
-              </apply>
-            </apply>
-          </apply>
-        </math>
-      </assignmentRule>
-
-      <assignmentRule variable="deactivation_inf">
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <apply>
-            <times/>
-            <ci> deactivation_rate_inf </ci>
-            <ci> nf_kappaB_inhibitor </ci>
-          </apply>
-        </math>
-      </assignmentRule>
     </listOfRules>
 
     <listOfReactions>
