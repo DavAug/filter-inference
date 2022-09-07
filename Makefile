@@ -1,8 +1,9 @@
 # Makefile for paper (figures and data)
 .PHONY: plot_results clean_plots
-plot_results: plot_cancer_growth_results
-
+plot_results: plot_cancer_growth_results plot_egf_pathway_results
 plot_cancer_growth_results: results/1_cancer_growth/results.ipynb
+	jupyter nbconvert --to notebook --inplace --execute $<
+plot_egf_pathway_results: results/2_egf_pathway/results.ipynb
 	jupyter nbconvert --to notebook --inplace --execute $<
 
 # Reproduce results from scratch (may take several hours)
@@ -32,52 +33,14 @@ generate_egf_pathway_data:
 run_filter_inference_egf_pathway_data:
 	python results/2_egf_pathway/2_run_filter_inference_egf_pathway.py
 
+# 2. TNF pathway study
+reproduce_tnf_pathway_results: generate_tnf_pathway_data
+generate_tnf_pathway_data:
+	python results/3_tnf_pathway/1_generate_tnf_pathway_data.py
+run_filter_inference_tnf_pathway_data:
+	python results/3_tnf_pathway/2_run_filter_inference_tnf_pathway.py
 
-# # Run analysis of in vitro study
-# in_vitro_study: format_data infer_K_model infer_KP_model infer_KR_model plot_results
 
-# format_data: data/raw_data/format_data.ipynb
-# 	jupyter nbconvert --to notebook --inplace --execute $<
-# infer_K_model: results/in_vitro_study/infer_K_model.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1000 --execute $<
-# infer_KP_model: results/in_vitro_study/infer_KP_model.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1000 --execute $<
-# infer_KR_model: results/in_vitro_study/infer_KR_model.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1000 --execute $<
-# plot_results: results/in_vitro_study/plot_results.ipynb
-# 	jupyter nbconvert --to notebook --inplace --execute $<
-
-# # Run analysis of in silico study
-# in_silico_study: synthesise_data infer_K_model_after_10h infer_K_model_after_15h infer_K_model_after_20h infer_K_model_after_30h infer_KP_model_after_10h infer_KP_model_after_15h infer_KP_model_after_20h infer_KP_model_after_30h infer_KR_model_after_10h infer_KR_model_after_15h infer_KR_model_after_20h infer_KR_model_after_30h predict_doses
-
-# synthesise_data: results/in_silico_study/synthesise_data.ipynb
-# 	jupyter nbconvert --to notebook --inplace --execute $<
-# infer_K_model_after_10h: results/in_silico_study/infer_K_model_after_10h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_K_model_after_15h: results/in_silico_study/infer_K_model_after_15h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_K_model_after_20h: results/in_silico_study/infer_K_model_after_20h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_K_model_after_30h: results/in_silico_study/infer_K_model_after_30h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KP_model_after_10h: results/in_silico_study/infer_KP_model_after_10h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KP_model_after_15h: results/in_silico_study/infer_KP_model_after_15h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KP_model_after_20h: results/in_silico_study/infer_KP_model_after_20h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KP_model_after_30h: results/in_silico_study/infer_KP_model_after_30h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KR_model_after_10h: results/in_silico_study/infer_KR_model_after_10h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KR_model_after_15h: results/in_silico_study/infer_KR_model_after_15h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KR_model_after_20h: results/in_silico_study/infer_KR_model_after_20h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# infer_KR_model_after_30h: results/in_silico_study/infer_KR_model_after_30h.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
-# predict_doses: results/in_silico_study/predict_doses.ipynb
-# 	jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute $<
 
 # # Delete figures and derived data
 # clean: clean_in_vitro_data clean_in_silico_data clean_figures
