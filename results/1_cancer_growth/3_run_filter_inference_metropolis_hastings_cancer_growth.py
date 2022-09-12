@@ -146,7 +146,7 @@ def run_inference(log_posterior, filename):
         0.8]   # Sigma
         )
 
-    n_iterations = 10000
+    n_iterations = 65000
     covariance_matrix = np.diag([0.03, 0.02, 0.03, 0.01, 0.02])
     posterior_samples = controller.run(
         n_iterations=n_iterations, hyperparameters=[covariance_matrix],
