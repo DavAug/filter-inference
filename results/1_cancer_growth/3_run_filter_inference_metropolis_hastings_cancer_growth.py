@@ -161,7 +161,7 @@ def run_inference(log_posterior, filename):
 
 if __name__ == '__main__':
     directory = os.path.dirname(os.path.abspath(__file__))
-    for idn, n in enumerate(15, 45, 135, 405):
+    for idn, n in enumerate([15, 45, 135, 405]):
         lp = define_log_posterior(15)
         filename = \
             directory + \
