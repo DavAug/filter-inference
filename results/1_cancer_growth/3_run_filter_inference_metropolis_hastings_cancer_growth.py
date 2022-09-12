@@ -121,7 +121,7 @@ def define_log_posterior(n_ids_per_t):
         pints.GaussianLogPrior(5, 3),        # Mean exponential growth
         pints.LogNormalLogPrior(2, 1),       # Std. initial condition
         pints.LogNormalLogPrior(0.5, 1),     # Std. exponential growth
-        pints.GaussianLogPrior(0.8, 0.1))    # Sigma
+        pints.TruncatedGaussianLogPrior(0.8, 0.1, a=0, b=np.inf))    # Sigma
     population_filter = chi.GaussianFilter(measurements)
     log_posterior = StochasticFilterLogPosterior(
         population_filter, times, predictive_model, log_prior,
@@ -162,10 +162,10 @@ def run_inference(log_posterior, filename):
 if __name__ == '__main__':
     directory = os.path.dirname(os.path.abspath(__file__))
     for idn, n in enumerate([15, 45, 135, 405]):
-        lp = define_log_posterior(15)
+        lp = define_log_posterior(n)
         filename = \
             directory + \
             '/posteriors/' + \
             '%d_filter_inference_metropolis_hastings' % (idn + 99) + \
             '_cancer_growth_100_sim_ids_%d_ids.nc' % n
-    run_inference(lp, filename)
+        run_inference(lp, filename)
