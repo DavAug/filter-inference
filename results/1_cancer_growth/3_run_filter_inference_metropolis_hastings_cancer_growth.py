@@ -146,7 +146,7 @@ def run_inference(log_posterior, filename):
         0.8]   # Sigma
         )
 
-    n_iterations = 65000
+    n_iterations = 90000
     covariance_matrix = np.diag([0.03, 0.02, 0.03, 0.01, 0.02])
     posterior_samples = controller.run(
         n_iterations=n_iterations, hyperparameters=[covariance_matrix],
@@ -161,9 +161,11 @@ def run_inference(log_posterior, filename):
 
 if __name__ == '__main__':
     directory = os.path.dirname(os.path.abspath(__file__))
-    lp = define_log_posterior(15)
-    filename = \
-        directory + \
-        '/posteriors/' + \
-        '99_filter_inference_metropolis_hastings_cancer_growth_100_ids.nc'
+    for idn, n in enumerate(15, 45, 135, 405):
+        lp = define_log_posterior(15)
+        filename = \
+            directory + \
+            '/posteriors/' + \
+            '%d_filter_inference_metropolis_hastings' % (idn + 99) + \
+            '_cancer_growth_100_sim_ids_%d_ids.nc' % n
     run_inference(lp, filename)
