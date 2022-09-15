@@ -1,5 +1,4 @@
 import os
-import timeit
 
 import chi
 import numpy as np
@@ -116,7 +115,7 @@ def run_inference(log_posterior, tofile):
 
 
 if __name__ == '__main__':
-    n_ids_per_t = [4]#[4, 8, 12, 16, 20, 24]
+    n_ids_per_t = [4, 8, 12, 16, 20, 24]
     mm, em, pm, p = define_model()
     predictive_model = chi.PredictiveModel(mm, em)
     predictive_model = chi.PopulationPredictiveModel(
