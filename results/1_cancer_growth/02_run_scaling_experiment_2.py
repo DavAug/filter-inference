@@ -98,54 +98,89 @@ def define_filter_log_posterior(
     return log_posterior
 
 
-def estimate_evaluation_time(log_posterior):
-    test_parameters = log_posterior.sample_initial_parameters()[0]
-    # Evaluate once, so sensitivities are switched on
-    log_posterior.evaluateS1(test_parameters)
-
-    number = 1
-    repeats = 10
-    run_time = timeit.repeat(
-        'logp.evaluateS1(p)',
-        globals=dict(logp=log_posterior, p=test_parameters),
-        number=number, repeat=repeats)
-
-    return np.min(run_time) / number
+def run_inference(log_posterior, tofile):
+    # Run inference
+    seed = 4
+    n_chains = 1
+    n_iterations = 1500
+    initial_params = log_posterior.sample_initial_parameters(
+        n_samples=n_chains, seed=seed)
+    controller = pints.MCMCController(
+        log_pdf=log_posterior, chains=n_chains, x0=initial_params,
+        method=pints.NoUTurnMCMC)
+    controller.set_max_iterations(n_iterations)
+    controller.set_log_to_file(tofile, csv=True)
+    controller.set_chain_storage(False)
+    controller.set_parallel(True)
+    controller.run()
 
 
 if __name__ == '__main__':
-    n_ids_per_t = [4, 8, 12, 16, 20, 24]
+    n_ids_per_t = [4]#[4, 8, 12, 16, 20, 24]
     mm, em, pm, p = define_model()
     predictive_model = chi.PredictiveModel(mm, em)
     predictive_model = chi.PopulationPredictiveModel(
         predictive_model, pm)
 
     # Estimate evaluation time of log-posteriors
-    nlme_costs = []
-    filter_costs = [[], [], []]
-    n_samples = [50, 100, 150]
+    directory = os.path.dirname(os.path.abspath(__file__))
     for seed, n_ids in enumerate(tqdm(n_ids_per_t)):
         meas, t = generate_measurements(n_ids, predictive_model, p, seed)
         logp = define_nlme_log_posterior(meas, t, mm, em, pm)
-        nlme_costs += [estimate_evaluation_time(logp)]
+        filename = directory + '/nlme_number_of_evaluations_%d.csv' % n_ids
+        run_inference(logp, filename)
 
         reduced_pm = chi.GaussianModel(
             n_dim=2, dim_names=['Initial count', 'Growth rate'],
             centered=False)
-        for ids, s in enumerate(n_samples):
-            logp = define_filter_log_posterior(meas, t, mm, reduced_pm, s)
-            filter_costs[ids] += [estimate_evaluation_time(logp)]
+        logp = define_filter_log_posterior(meas, t, mm, reduced_pm, 100)
+        filename = directory + '/filter_number_of_evaluations_%d.csv' % n_ids
+        run_inference(logp, filename)
 
-    # Save results to csv
-    directory = os.path.dirname(os.path.abspath(__file__))
+    # Collect data from temporary files into one csv file
+    warmup = 500
+    iter_per_log = 20
+    warmup_index = 500 // 20
+    n_iterations = 1500
+    n_evals = [[], []]
+    for idf, f in enumerate(
+            ['/nlme_number_of_evaluations', '/filter_number_of_evaluations']):
+        for n_ids in n_ids_per_t:
+            # Load data
+            data = pd.read_csv(
+                directory + f + '_%d.csv' % n_ids)
+            # Get final number of evaluations and final run time
+            # (final valid entry is determined by first NaN entry)
+            final_index = data.isna().any(axis=1)[warmup_index:].argmax()
+            final_iter = n_iterations
+            if final_index > 0:
+                # Final index is smaller than n_iterations
+                final_iter = data.iloc[warmup_index+final_index]['Iter.']
+            mask = data['Iter.'] == final_iter
+            e = data[mask]['Eval.'].values[0]
+            # Subtract warm up
+            mask = data['Iter.'] == warmup
+            e -= data[mask]['Eval.'].values[0]
+            # Estimate number of evaluations and run time for 1000 iterations
+            # of a single chain
+            e = e / (final_iter - warmup) * n_iterations
+            # Append to container
+            n_evals[idf].append(e)
+
+    # Save results to file
     n_ids = np.array(n_ids_per_t) * 6
     df = pd.DataFrame({
         'Number of measured individuals': n_ids,
         'Type': 'NLME',
-        'Cost in sec': nlme_costs})
-    for ids, s in enumerate(n_samples):
-        df = pd.concat([df, pd.DataFrame({
-            'Number of measured individuals': n_ids,
-            'Type': 'Filter %d' % s,
-            'Cost in sec': filter_costs[ids]})])
-    df.to_csv(directory + '/scaling_with_measurements.csv')
+        'Number of evaluations': n_evals[0]})
+    df = pd.concat([df, pd.DataFrame({
+        'Number of measured individuals': n_ids,
+        'Type': 'Filter 100',
+        'Cost in sec': n_evals[1]})])
+    df.to_csv(directory + '/number_of_evaluations.csv')
+
+    # Remove temporary files
+    for idf, f in enumerate(
+            ['/nlme_number_of_evaluations', '/filter_number_of_evaluations']):
+        for n_ids in n_ids_per_t:
+            os.remove(directory + f + '_%d.csv' % n_ids)
