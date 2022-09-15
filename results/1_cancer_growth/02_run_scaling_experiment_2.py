@@ -138,8 +138,6 @@ if __name__ == '__main__':
 
     # Collect data from temporary files into one csv file
     warmup = 500
-    iter_per_log = 20
-    warmup_index = 500 // 20
     n_iterations = 1500
     n_evals = [[], []]
     for idf, f in enumerate(
@@ -148,23 +146,11 @@ if __name__ == '__main__':
             # Load data
             data = pd.read_csv(
                 directory + f + '_%d.csv' % n_ids)
-            # Get final number of evaluations and final run time
-            # (final valid entry is determined by first NaN entry)
-            final_index = data.isna().any(axis=1)[warmup_index:].argmax()
-            final_iter = n_iterations
-            if final_index > 0:
-                # Final index is smaller than n_iterations
-                final_iter = data.iloc[warmup_index+final_index]['Iter.']
-            mask = data['Iter.'] == final_iter
-            e = data[mask]['Eval.'].values[0]
-            # Subtract warm up
-            mask = data['Iter.'] == warmup
-            e -= data[mask]['Eval.'].values[0]
-            # Estimate number of evaluations and run time for 1000 iterations
-            # of a single chain
-            e = e / (final_iter - warmup) * n_iterations
-            # Append to container
-            n_evals[idf].append(e)
+
+            # Get number of evaluations post warmup
+            e_warmup = data[data['Iter.'] == warmup]['Eval.'].values[0]
+            e_total = data[data['Iter.'] == n_iterations]['Eval.'].values[0]
+            n_evals[idf].append(e_total - e_warmup)
 
     # Save results to file
     n_ids = np.array(n_ids_per_t) * 6
@@ -175,7 +161,7 @@ if __name__ == '__main__':
     df = pd.concat([df, pd.DataFrame({
         'Number of measured individuals': n_ids,
         'Type': 'Filter 100',
-        'Cost in sec': n_evals[1]})])
+        'Number of evaluations': n_evals[1]})])
     df.to_csv(directory + '/number_of_evaluations.csv')
 
     # Remove temporary files
