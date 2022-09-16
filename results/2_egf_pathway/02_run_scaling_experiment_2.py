@@ -190,9 +190,12 @@ if __name__ == '__main__':
         filename = directory + '/nlme_number_of_evaluations_%d.csv' % n_ids
         run_inference(logp, filename)
 
-        reduced_pm = chi.GaussianModel(
-            n_dim=2, dim_names=['Initial count', 'Growth rate'],
-            centered=False)
+        reduced_pm = chi.ComposedPopulationModel([
+            chi.GaussianModel(dim_names=['Activation rate'], centered=False),
+            chi.PooledModel(n_dim=3, dim_names=[
+                'Deactivation rate', 'Deg. rate (act.)',
+                'Deg. rate (inact.)']),
+            chi.GaussianModel(dim_names=['Production rate'], centered=False)])
         logp = define_filter_log_posterior(meas, t, mm, reduced_pm, 100)
         filename = directory + '/filter_number_of_evaluations_%d.csv' % n_ids
         run_inference(logp, filename)
