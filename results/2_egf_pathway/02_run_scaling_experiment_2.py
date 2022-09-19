@@ -217,7 +217,7 @@ if __name__ == '__main__':
             n_evals[idf].append(e_total - e_warmup)
 
     # Save results to file
-    n_ids = np.array(n_ids_per_t) * 6
+    n_ids = np.array(n_ids_per_t) * 6 * 4
     df = pd.DataFrame({
         'Number of measured individuals': n_ids,
         'Type': 'NLME',
