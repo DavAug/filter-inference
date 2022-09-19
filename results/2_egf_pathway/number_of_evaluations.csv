@@ -1,0 +1,13 @@
+,Number of measured individuals,Type,Number of evaluations
+0,24,NLME,43315
+1,48,NLME,93513
+2,72,NLME,45365
+3,96,NLME,37145
+4,120,NLME,30489
+5,144,NLME,81337
+0,24,Filter 100,30969
+1,48,Filter 100,62937
+2,72,Filter 100,62937
+3,96,Filter 100,62937
+4,120,Filter 100,62937
+5,144,Filter 100,126873
