@@ -33,9 +33,20 @@ Epidermal growth factor signalling pathway dataset
 
 ### Data-generating scripts
 
-1. [Implementation of early cancer growth model](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/exponential_growth_model.py)
-2. [Generate early cancer growth datasets (unimodal)](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/1_generate_data.py)
-3. [Generate early cancer growth dataset (bimodal)](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/5_generate_bimodal_cancer_growth_data.py)
+Early cancer growth:
+1. [Generate datasets with no substructure](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/1_generate_data.py)
+2. [Generate datasets with slow and aggressive cancer growth](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/5_generate_bimodal_cancer_growth_data.py)
+
+Epidermal growth factor signalling pathway:
+1. [Generate dataset](https://github.com/DavAug/filter-inference/blob/main/results/2_egf_pathway/8_generate_data.py)
+
+### Inference scripts
+Early cancer growth:
+1. [NLME inference from 90 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/2_run_nlme_inference.py)
+2. [Filter inference from 90, 270, 810 and 2430 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/3_run_filter_inference.py)
+3. [Filter inference from 2430 snapshot measurements with varying numbers of simulated individuals](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/4_run_information_loss_experiment_1.py)
+4. [NLME inference from 240 snapshot measurements of structured population](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/6_run_nlme_inference_bimodal_cancer_growth.py)
+5. [Filter infernece from 240 and 3000 snapshot measurements of structured population using different filters](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/7_run_filter_inference_bimodal_cancer_growth.py)
 
 ## Reproducing the results
 
