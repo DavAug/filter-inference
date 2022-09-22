@@ -48,6 +48,9 @@ Early cancer growth:
 4. [NLME inference from 240 snapshot measurements of structured population](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/6_run_nlme_inference_bimodal_cancer_growth.py)
 5. [Filter infernece from 240 and 3000 snapshot measurements of structured population using different filters](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/7_run_filter_inference_bimodal_cancer_growth.py)
 
+Epidermal growth factor signalling pathway:
+1. [Filter inference from 2400 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/2_egf_pathway/9_run_filter_inference.py)
+
 ## Reproducing the results
 
 To reproduce the results, the GitHub repository can be cloned, and the scripts
