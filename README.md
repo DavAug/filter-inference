@@ -6,8 +6,30 @@ This GitHub repository serves as documentation and reproduction source for the r
 
 The results are documented by multiple notebooks. To open the notebooks, please follow the links below:
 
-1. [Early cancer model inference results](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/results.ipynb)
+1. [Early cancer growth model inference results](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/results.ipynb)
 2. [EGF pathway model inference results](https://github.com/DavAug/filter-inference/blob/main/results/2_egf_pathway/results.ipynb)
+
+To inspect the scripts used to generate data, implement models and to estimate model parameters, please follow the links below:
+
+### Datasets
+Early cancer gowth datasets (no substructure):
+1. [90 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/data/1_cancer_growth_data_15.csv)
+2. [270 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/data/1_cancer_growth_data_45.csv)
+3. [810 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/data/1_cancer_growth_data_135.csv)
+4. [2430 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/data/1_cancer_growth_data_405.csv)
+
+Early cancer growth datasets (slow and aggressive growth subpopulations):
+1. [240 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/data/2_bimodal_cancer_growth_data_20.csv)
+2. [3000 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/data/2_bimodal_cancer_growth_data_500.csv)
+
+Epidermal growth factor signalling pathway dataset
+1. [2400 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/2_egf_pathway/data/1_egf_pathway_data.csv)
+
+### Data-generating scripts
+
+1. [Implementation of early cancer growth model](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/exponential_growth_model.py)
+2. [Generate early cancer growth datasets (unimodal)](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/1_generate_data.py)
+3. [Generate early cancer growth dataset (bimodal)](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/5_generate_bimodal_cancer_growth_data.py)
 
 ## Reproducing the results
 
