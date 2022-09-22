@@ -25,6 +25,12 @@ Early cancer growth datasets (slow and aggressive growth subpopulations):
 Epidermal growth factor signalling pathway dataset
 1. [2400 snapshot measurements](https://github.com/DavAug/filter-inference/blob/main/results/2_egf_pathway/data/1_egf_pathway_data.csv)
 
+### Model implementations
+
+1. [Early cancer growth model](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/exponential_growth_model.py)
+2. [EGF pathway model (SBML)](https://github.com/DavAug/filter-inference/blob/main/models/dixit_growth_factor_model.xml)
+3. [EGF pathway model exposed to 2 constant EGF concentrations](https://github.com/DavAug/filter-inference/blob/main/results/2_egf_pathway/growth_factor_model.py)
+
 ### Data-generating scripts
 
 1. [Implementation of early cancer growth model](https://github.com/DavAug/filter-inference/blob/main/results/1_cancer_growth/exponential_growth_model.py)
