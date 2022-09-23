@@ -54,7 +54,7 @@ Epidermal growth factor signalling pathway:
 ## Reproducing the results
 
 To reproduce the results, the GitHub repository can be cloned, and the scripts
-cane be executed locally. For ease of execution, we prepared a `Makefile` that
+can be executed locally. For ease of execution, we prepared a `Makefile` that
 runs the scripts in the correct order. Please find a step-by-step instruction
 how to install the dependencies and how to reproduce the results, once the
 repostory has been cloned.
