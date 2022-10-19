@@ -49,7 +49,6 @@ def generate_data():
 
 def define_log_posterior(measurements, times):
     # Define log-posterior
-    n_ids = np.prod(measurements.shape)
     mechanistic_model = ExponentialGrowthModel()
     population_filter = chi.GaussianFilter(measurements)
     population_model = chi.GaussianModel(
@@ -62,7 +61,7 @@ def define_log_posterior(measurements, times):
         pints.GaussianLogPrior(0.8, 0.1))    # Sigma
     log_posterior = chi.PopulationFilterLogPosterior(
         population_filter, times, mechanistic_model, population_model,
-        log_prior, n_samples=10000)
+        log_prior, n_samples=5000)
 
     return log_posterior
 
