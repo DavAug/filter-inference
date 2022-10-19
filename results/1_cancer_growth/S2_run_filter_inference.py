@@ -81,7 +81,13 @@ def run_inference(log_posterior, filename):
     warmup = 500
     thinning = 1
     posterior_samples.sel(
-        draw=slice(warmup, n_iterations, thinning)).to_netcdf(filename)
+        draw=slice(warmup, n_iterations, thinning))[[
+            'Mean Initial volume',
+            'Std. Initial volume',
+            'Mean Growth rate',
+            'Std. Growth rate',
+            'Sigma Tumour volume'
+        ]].to_netcdf(filename)
 
 
 if __name__ == '__main__':
