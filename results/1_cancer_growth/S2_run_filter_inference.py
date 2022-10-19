@@ -92,7 +92,8 @@ def run_inference(log_posterior, filename):
 
 if __name__ == '__main__':
     directory = os.path.dirname(os.path.abspath(__file__))
-    lp = define_log_posterior()
+    m, t = generate_data()
+    lp = define_log_posterior(m, t)
     filename = \
         directory + \
         '/posteriors' + \
