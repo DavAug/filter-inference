@@ -37,7 +37,7 @@ def generate_data():
     # Keep only one measurement per individual
     n_times = len(times)
     n_observables = 1
-    n_ids_per_t = 5000
+    n_ids_per_t = 10000
     measurements = np.empty(shape=(n_ids_per_t, n_observables, n_times))
     for idt in range(n_times):
         start_ids = idt * n_ids_per_t
@@ -62,7 +62,7 @@ def define_log_posterior(measurements, times):
         pints.GaussianLogPrior(0.8, 0.1))    # Sigma
     log_posterior = chi.PopulationFilterLogPosterior(
         population_filter, times, mechanistic_model, population_model,
-        log_prior, n_samples=n_ids)
+        log_prior, n_samples=10000)
 
     return log_posterior
 
