@@ -37,7 +37,7 @@ def generate_data():
     # Keep only one measurement per individual
     n_times = len(times)
     n_observables = 1
-    n_ids_per_t = 10000
+    n_ids_per_t = 5000
     measurements = np.empty(shape=(n_ids_per_t, n_observables, n_times))
     for idt in range(n_times):
         start_ids = idt * n_ids_per_t
