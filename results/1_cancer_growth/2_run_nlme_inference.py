@@ -7,11 +7,11 @@ import pints
 from exponential_growth_model import ExponentialGrowthModel
 
 
-def define_log_posterior():
+def define_log_posterior(n):
     # Import data
     directory = os.path.dirname(os.path.abspath(__file__))
     measurements_df = pd.read_csv(
-        directory + '/data/1_cancer_growth_data_15.csv')
+        directory + '/data/1_cancer_growth_data_%d.csv' % n)
 
     # Define hierarchical log-posterior
     mechanistic_model = ExponentialGrowthModel()
@@ -35,7 +35,7 @@ def define_log_posterior():
     return problem.get_log_posterior()
 
 
-def run_inference(log_posterior):
+def run_inference(log_posterior, filename):
     seed = 2
     controller = chi.SamplingController(log_posterior, seed=seed)
     controller.set_n_runs(1)
@@ -48,15 +48,15 @@ def run_inference(log_posterior):
     # Save results
     warmup = 500
     thinning = 1
-    directory = os.path.dirname(os.path.abspath(__file__))
     posterior_samples.sel(
-        draw=slice(warmup, n_iterations, thinning)
-    ).to_netcdf(
-        directory +
-        '/posteriors/1_nlme_inference_cancer_growth.nc'
-    )
+        draw=slice(warmup, n_iterations, thinning)).to_netcdf(filename)
 
 
 if __name__ == '__main__':
-    lp = define_log_posterior()
-    run_inference(lp)
+    directory = os.path.dirname(os.path.abspath(__file__))
+    for idn, n in enumerate([405]):  # enumerate([15, 45, 135, 405]):
+        lp = define_log_posterior(n)
+        filename = \
+            directory + \
+            '/posteriors/1_nlme_inference_cancer_growth_%d.nc' % n
+        run_inference(lp, filename)
