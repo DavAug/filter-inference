@@ -1,5 +1,6 @@
 import os
 
+import arviz as az
 import chi
 import numpy as np
 import pandas as pd
@@ -130,42 +131,71 @@ def define_log_posterior(n_ids_per_t):
     return log_posterior
 
 
-def run_inference(log_posterior, filename):
+def run_inference(log_posterior, variances):
     seed = 3
     controller = chi.SamplingController(log_posterior, seed=seed)
-    controller.set_n_runs(1)
-    controller.set_parallel_evaluation(False)
+    controller.set_n_runs(3)
+    controller.set_parallel_evaluation(True)
     controller.set_sampler(MetropolisHastingsMCMC)
 
     # Initialise sampler at data-generating parameters
-    controller._initial_params[0] = np.array([
+    controller._initial_params[:] = np.array([
         10,    # Mean initial condition
         2,     # Mean exponential growth
         1,     # Std. initial condition
         0.5,   # Std. exponential growth
         0.8]   # Sigma
-        )
+        )[np.newaxis, :] \
+        + np.random.normal(loc=0, scale=np.sqrt(variances), size=(3, 5))
 
-    n_iterations = 90000
-    covariance_matrix = np.diag([0.03, 0.02, 0.03, 0.01, 0.02])
+    n_iterations = 5000
+    covariance_matrix = np.diag(variances)
     posterior_samples = controller.run(
         n_iterations=n_iterations, hyperparameters=[covariance_matrix],
         log_to_screen=True)
 
-    # Save results
-    warmup = 0
-    thinning = 1
-    posterior_samples.sel(
-        draw=slice(warmup, n_iterations, thinning)).to_netcdf(filename)
+    ess = np.min([
+        az.ess(posterior_samples[p].sel(
+            draw=slice(n_iterations//2, n_iterations)).values)
+        for p in log_posterior.get_parameter_names()])
+
+    return ess
+
+
+def save_to_file(nids_per_t, ess, posterior_stds, scales, names):
+    # Create a dataframe
+    df = pd.DataFrame(columns=[
+        'Number of measurements', 'ESS'] + names)
+
+    # Add data
+    for idn, n in enumerate(nids_per_t):
+        for ids, scale in enumerate(scales):
+            variances = posterior_stds[idn] * scale
+            data = {name: variances[idx] for idx, name in enumerate(names)}
+            data['Number of measurements'] = [n * 6]
+            data['ESS'] = ess[idn, ids]
+            df = pd.concat((df, pd.DataFrame(data)))
+
+    # Save to file
+    directory = os.path.dirname(os.path.abspath(__file__))
+    df.to_csv(directory + '/MH_hyperparameters.csv')
 
 
 if __name__ == '__main__':
     directory = os.path.dirname(os.path.abspath(__file__))
-    for idn, n in enumerate([15, 45, 135, 405]):
+    posterior_stds = np.array([
+        [0.086, 0.012, 0.072, 0.0082, 0.0089],
+        [0.030, 0.0070, 0.030, 0.0038, 0.098],
+        [0.020, 0.0046, 0.018, 0.0033, 0.0082],
+        [0.017, 0.0032, 0.0014, 0.0024, 0.0096],
+    ])
+    scales = [1.4, 1.2, 1, 0.8, 0.6, 0.4, 0.2]
+    ess = np.empty(shape=(len(posterior_stds), len(scales)))
+    nids_per_t = [15, 45, 135, 405]
+    for idn, n in enumerate(nids_per_t):
         lp = define_log_posterior(n)
-        filename = \
-            directory + \
-            '/posteriors/' + \
-            '%d_filter_inference_metropolis_hastings' % (idn + 99) + \
-            '_cancer_growth_100_sim_ids_%d_ids.nc' % n
-        run_inference(lp, filename)
+        for ids, scale in enumerate(scales):
+            ess[idn, ids] = run_inference(lp, posterior_stds[idn] * scale)
+
+    save_to_file(
+        nids_per_t, ess, posterior_stds, scales, lp.get_parameter_names())
