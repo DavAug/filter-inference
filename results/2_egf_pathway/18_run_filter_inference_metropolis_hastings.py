@@ -138,7 +138,19 @@ def define_log_posterior():
     return log_posterior
 
 
-def run_inference(log_posterior, filename):
+def get_hyperparameters(names):
+    # Load hyperparameters
+    directory = os.path.dirname(os.path.abspath(__file__))
+    df = pd.read_csv(directory + '/MH_hyperparameters.csv')
+
+    # Get hyperparameters with maximum ESS
+    max_ess = np.max(df.ESS.unique())
+    variances = df[df.ESS == max_ess][names].values[0]
+
+    return variances
+
+
+def run_inference(log_posterior, variances, filename):
     seed = 3
     controller = chi.SamplingController(log_posterior, seed=seed)
     controller.set_n_runs(1)
@@ -155,8 +167,8 @@ def run_inference(log_posterior, filename):
         0.05]   # Std. production rate
         )
 
-    n_iterations = 90000
-    covariance_matrix = np.diag([0.1, 0.01, 0.0001, 0.01, 0.1, 0.02])
+    n_iterations = 200000
+    covariance_matrix = np.diag(variances)
     posterior_samples = controller.run(
         n_iterations=n_iterations, hyperparameters=[covariance_matrix],
         log_to_screen=True)
@@ -171,8 +183,9 @@ def run_inference(log_posterior, filename):
 if __name__ == '__main__':
     directory = os.path.dirname(os.path.abspath(__file__))
     lp = define_log_posterior()
+    var = get_hyperparameters(lp.get_parameter_names())
     filename = \
         directory + \
         '/posteriors/' + \
         '99_filter_inference_metropolis_hastings_egf_100_ids.nc'
-    run_inference(lp, filename)
+    run_inference(lp, var, filename)
