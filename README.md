@@ -2,7 +2,7 @@
 
 # Filter inference: A scalable nonlinear mixed effects inference approach for snapshot time series data
 
-This GitHub repository serves as documentation and reproduction source for the results published in XXX. It contains the raw data, the data derived during the analysis, the model specifications (SBML format) and executable scripts (Python scripts as well as Jupyter notebooks).
+This GitHub repository serves as documentation and reproduction source for the results published in PLOS Computational Biology. It contains the raw data, the data derived during the analysis, the model specifications (SBML format) and executable scripts (Python scripts as well as Jupyter notebooks).
 
 ## Looking at the results
 
